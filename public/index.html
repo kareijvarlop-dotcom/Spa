@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Spa Belleza - Sistema de Reservas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #fff0f5;
+        }
+        .encabezado {
+            background-color: #c2185b;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .encabezado h1 { margin: 0; font-size: 24px; }
+        .encabezado p  { margin: 5px 0 0; font-size: 14px; opacity: 0.85; }
+
+        .menu {
+            background-color: #ad1457;
+            padding: 10px 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .menu button {
+            background-color: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 8px 18px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .menu button.seleccionado {
+            background-color: white;
+            color: #ad1457;
+            font-weight: bold;
+        }
+
+        .contenido {
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .seccion { display: none; }
+        .seccion.visible { display: block; }
+
+        .caja {
+            background-color: white;
+            border: 1px solid #f8bbd0;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .caja h2 {
+            margin-top: 0;
+            color: #c2185b;
+            font-size: 18px;
+            border-bottom: 2px solid #fce4ec;
+            padding-bottom: 10px;
+        }
+
+        .fila-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .campo {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 180px;
+        }
+        .campo label {
+            font-size: 13px;
+            color: #880e4f;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+        .campo input,
+        .campo select {
+            padding: 8px 10px;
+            border: 1px solid #f48fb1;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+        .campo input:focus,
+        .campo select:focus {
+            outline: none;
+            border-color: #c2185b;
+        }
+
+        .btn-guardar {
+            background-color: #c2185b;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .btn-guardar:hover { background-color: #ad1457; }
+
+        .btn-actualizar {
+            background-color: #888;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-left: 8px;
+        }
+        .btn-eliminar {
+            background-color: #e53935;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .btn-circular {
+            background-color: #e91e8c;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        table th {
+            background-color: #c2185b;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+        }
+        table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid #fce4ec;
+        }
+        table tr:hover td { background-color: #fce4ec; }
+
+        .estado {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .pendiente  { background: #fff3cd; color: #856404; }
+        .confirmada { background: #d4edda; color: #155724; }
+        .en_curso   { background: #cce5ff; color: #004085; }
+        .finalizada { background: #e2e3e5; color: #383d41; }
+        .cancelada  { background: #f8d7da; color: #721c24; }
+
+        .alerta {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        .alerta-ok  { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alerta-err { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        .caja-circular {
+            background-color: #fce4ec;
+            border: 2px solid #c2185b;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-top: 15px;
+            display: none;
+        }
+        .caja-circular h3 { margin: 0 0 10px; color: #c2185b; }
+        .caja-circular p  { margin: 5px 0; font-size: 14px; }
+        .nota-circular {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+            border-top: 1px solid #f48fb1;
+            padding-top: 8px;
+        }
+
+        .error-carga {
+            color: #e53935;
+            font-size: 13px;
+            padding: 8px;
+            background: #ffebee;
+            border-radius: 4px;
+            margin-top: 6px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="encabezado">
+    <h1>🌸 Spa Belleza & Relajacion</h1>
+    <p>Sistema de Gestion de Reservas</p>
+</div>
+
+<div class="menu">
+    <button class="seleccionado" onclick="mostrar('reservas', this)">Reservas</button>
+    <button onclick="mostrar('clientes', this)">Clientes</button>
+    <button onclick="mostrar('circular', this)">Lista Circular</button>
+</div>
+
+<div class="contenido">
+
+    <!-- RESERVAS -->
+    <div id="reservas" class="seccion visible">
+        <div class="caja">
+            <h2>Registrar Nueva Reserva</h2>
+            <div class="fila-form">
+                <div class="campo">
+                    <label>Cliente</label>
+                    <select id="sel-cliente">
+                        <option value="">Cargando clientes...</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Paquete</label>
+                    <select id="sel-paquete" onchange="autocompletarPrecio()">
+                        <option value="">Cargando paquetes...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fila-form">
+                <div class="campo">
+                    <label>Fecha de la reserva</label>
+                    <input type="date" id="inp-fecha">
+                </div>
+                <div class="campo">
+                    <label>Hora</label>
+                    <input type="time" id="inp-hora">
+                </div>
+                <div class="campo">
+                    <label>Total a pagar ($)</label>
+                    <input type="number" id="inp-total" placeholder="0">
+                </div>
+            </div>
+            <button class="btn-guardar" onclick="crearReserva()">Guardar Reserva</button>
+            <button class="btn-actualizar" onclick="cargarReservas()">Actualizar tabla</button>
+            <div id="msg-reserva" class="alerta"></div>
+        </div>
+        <div class="caja">
+            <h2>Lista de Reservas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Cliente</th><th>Paquete</th>
+                        <th>Fecha</th><th>Hora</th><th>Total</th>
+                        <th>Estado</th><th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-reservas"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="clientes" class="seccion">
+        <div class="caja">
+            <h2>Registrar Nuevo Cliente</h2>
+            <div class="fila-form">
+                <div class="campo">
+                    <label>Nombre completo</label>
+                    <input type="text" id="inp-nombre" placeholder="Ej: Maria Garcia">
+                </div>
+                <div class="campo">
+                    <label>Email</label>
+                    <input type="email" id="inp-email" placeholder="Ej: maria@correo.com">
+                </div>
+                <div class="campo">
+                    <label>Telefono</label>
+                    <input type="text" id="inp-telefono" placeholder="Ej: 3001234567">
+                </div>
+            </div>
+            <button class="btn-guardar" onclick="crearCliente()">Guardar Cliente</button>
+            <div id="msg-cliente" class="alerta"></div>
+        </div>
+        <div class="caja">
+            <h2>Clientes Registrados</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Nombre</th><th>Email</th>
+                        <th>Telefono</th><th>Fecha registro</th><th>Eliminar</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-clientes"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LISTA CIRCULAR -->
+    <div id="circular" class="seccion">
+        <div class="caja">
+            <h2>Lista Circular de Reservas</h2>
+            <p style="color:#666; font-size:14px; line-height:1.6;">
+                La lista circular es una estructura de datos donde cada nodo apunta al siguiente,
+                y el <strong>ultimo nodo apunta al primero</strong>, formando un ciclo sin fin.
+                Cuando llega al ultimo elemento, vuelve automaticamente al primero.
+            </p>
+            <p style="color:#666; font-size:14px; margin-top:8px;">
+                Las reservas se cargan automaticamente. Presiona el boton para navegar una por una.
+            </p>
+            <button class="btn-circular" onclick="verSiguiente()">▶ Ver siguiente reserva</button>
+            <button class="btn-actualizar" onclick="recargarLista()">Recargar lista</button>
+            <div class="caja-circular" id="caja-circ">
+                <h3 id="circ-cliente"></h3>
+                <p id="circ-paquete"></p>
+                <p id="circ-fecha"></p>
+                <p id="circ-total"></p>
+                <p id="circ-estado"></p>
+                <div class="nota-circular" id="circ-nota"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+var servidor = 'http://localhost:3000';
+
+// Navegacion 
+function mostrar(id, boton) {
+    document.querySelectorAll('.seccion').forEach(function(s) {
+        s.classList.remove('visible');
+    });
+    document.querySelectorAll('.menu button').forEach(function(b) {
+        b.classList.remove('seleccionado');
+    });
+    document.getElementById(id).classList.add('visible');
+    boton.classList.add('seleccionado');
+}
+
+// Mensajes 
+function mostrarMensaje(id, texto, esExito) {
+    var el = document.getElementById(id);
+    el.textContent = texto;
+    el.className = 'alerta ' + (esExito ? 'alerta-ok' : 'alerta-err');
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 3500);
+}
+
+// Cargar selects 
+function cargarSelects() {
+    // Clientes
+    fetch(servidor + '/clientes')
+        .then(function(r) {
+            if (!r.ok) throw new Error('Error ' + r.status);
+            return r.json();
+        })
+        .then(function(datos) {
+            var sel = document.getElementById('sel-cliente');
+            if (datos.length == 0) {
+                sel.innerHTML = '<option value="">No hay clientes aun</option>';
+                return;
+            }
+            sel.innerHTML = '<option value="">Selecciona un cliente...</option>';
+            datos.forEach(function(c) {
+                sel.innerHTML += '<option value="' + c.clientes_id + '">' + c.nombre + '</option>';
+            });
+        })
+        .catch(function(e) {
+            document.getElementById('sel-cliente').innerHTML = '<option>Error al cargar</option>';
+            console.log('Error clientes:', e);
+        });
+
+    // Paquetes
+    fetch(servidor + '/paquetes')
+        .then(function(r) {
+            if (!r.ok) throw new Error('Error ' + r.status);
+            return r.json();
+        })
+        .then(function(datos) {
+            var sel = document.getElementById('sel-paquete');
+            if (datos.length == 0) {
+                sel.innerHTML = '<option value="">No hay paquetes aun</option>';
+                return;
+            }
+            sel.innerHTML = '<option value="">Selecciona un paquete...</option>';
+            datos.forEach(function(p) {
+                sel.innerHTML += '<option value="' + p.paquete_id + '" data-precio="' + p.precio_total + '">'
+                    + p.nombre + ' - $' + Number(p.precio_total).toLocaleString() + '</option>';
+            });
+        })
+        .catch(function(e) {
+            document.getElementById('sel-paquete').innerHTML = '<option>Error al cargar</option>';
+            console.log('Error paquetes:', e);
+        });
+}
+
+function autocompletarPrecio() {
+    var sel = document.getElementById('sel-paquete');
+    var op  = sel.options[sel.selectedIndex];
+    if (op && op.dataset.precio) {
+        document.getElementById('inp-total').value = op.dataset.precio;
+    }
+}
+
+// CRUD Reservas
+function cargarReservas() {
+    fetch(servidor + '/reservas')
+        .then(function(r) { return r.json(); })
+        .then(function(datos) {
+            var tbody = document.getElementById('tabla-reservas');
+            tbody.innerHTML = '';
+            if (datos.length == 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:20px">No hay reservas registradas</td></tr>';
+                return;
+            }
+            datos.forEach(function(r) {
+                tbody.innerHTML +=
+                    '<tr>' +
+                    '<td>' + r.reserva_id + '</td>' +
+                    '<td>' + r.nombre_cliente + '<br><small style="color:#aaa">' + r.email + '</small></td>' +
+                    '<td>' + r.nombre_paquete + '</td>' +
+                    '<td>' + r.fecha_reserva + '</td>' +
+                    '<td>' + (r.hora_reserva || '-') + '</td>' +
+                    '<td>$' + Number(r.total_pagado).toLocaleString() + '</td>' +
+                    '<td><span class="estado ' + r.estado + '">' + r.estado + '</span></td>' +
+                    '<td>' +
+                        '<select onchange="cambiarEstado(' + r.reserva_id + ', this.value)" style="font-size:12px;padding:3px;margin-right:5px;border:1px solid #f48fb1;border-radius:4px">' +
+                            '<option value="">Cambiar estado...</option>' +
+                            '<option value="pendiente">pendiente</option>' +
+                            '<option value="confirmada">confirmada</option>' +
+                            '<option value="en_curso">en curso</option>' +
+                            '<option value="finalizada">finalizada</option>' +
+                            '<option value="cancelada">cancelada</option>' +
+                        '</select>' +
+                        '<button class="btn-eliminar" onclick="eliminarReserva(' + r.reserva_id + ')">Eliminar</button>' +
+                    '</td>' +
+                    '</tr>';
+            });
+        })
+        .catch(function(e) { console.log('Error reservas:', e); });
+}
+
+function crearReserva() {
+    var clientes_id = document.getElementById('sel-cliente').value;
+    var paquete_id = document.getElementById('sel-paquete').value;
+    var fecha_reserva = document.getElementById('inp-fecha').value;
+    var hora_reserva = document.getElementById('inp-hora').value;
+    var total_pagado = document.getElementById('inp-total').value;
+
+    if (clientes_id == '' || paquete_id == '' || fecha_reserva == '') {
+        mostrarMensaje('msg-reserva', 'Por favor selecciona cliente, paquete y fecha', false);
+        return;
+    }
+
+    fetch(servidor + '/reservas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            clientes_id: clientes_id,
+            paquete_id: paquete_id,
+            fecha_reserva: fecha_reserva,
+            hora_reserva: hora_reserva,
+            total_pagado: total_pagado
+        })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(datos) {
+        mostrarMensaje('msg-reserva', 'Reserva guardada correctamente', true);
+        cargarReservas();
+        cargarSelects();
+    })
+    .catch(function(e) {
+        mostrarMensaje('msg-reserva', 'Error al guardar: ' + e.message, false);
+    });
+}
+
+function cambiarEstado(id, estado) {
+    if (estado == '') return;
+    fetch(servidor + '/reservas/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: estado })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() { cargarReservas(); });
+}
+
+function eliminarReserva(id) {
+    if (!confirm('Seguro que deseas eliminar esta reserva?')) return;
+    fetch(servidor + '/reservas/' + id, { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function() { cargarReservas(); });
+}
+
+// CRUD Clientes 
+function cargarClientes() {
+    fetch(servidor + '/clientes')
+        .then(function(r) { return r.json(); })
+        .then(function(datos) {
+            var tbody = document.getElementById('tabla-clientes');
+            tbody.innerHTML = '';
+            if (datos.length == 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:20px">No hay clientes registrados</td></tr>';
+                return;
+            }
+            datos.forEach(function(c) {
+                tbody.innerHTML +=
+                    '<tr>' +
+                    '<td>' + c.clientes_id + '</td>' +
+                    '<td>' + c.nombre + '</td>' +
+                    '<td>' + c.email + '</td>' +
+                    '<td>' + (c.telefono || '-') + '</td>' +
+                    '<td>' + (c.fecha_registro || '-') + '</td>' +
+                    '<td><button class="btn-eliminar" onclick="eliminarCliente(' + c.clientes_id + ')">Eliminar</button></td>' +
+                    '</tr>';
+            });
+        });
+}
+
+function crearCliente() {
+    var nombre = document.getElementById('inp-nombre').value.trim();
+    var email = document.getElementById('inp-email').value.trim();
+    var telefono = document.getElementById('inp-telefono').value.trim();
+
+    if (nombre== '' || email== '') {
+        mostrarMensaje('msg-cliente', 'El nombre y el email son obligatorios', false);
+        return;
+    }
+
+    fetch(servidor + '/clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nombre, email: email, telefono: telefono })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(datos) {
+        if (datos.mensaje && datos.mensaje.includes('Error')) {
+            mostrarMensaje('msg-cliente', datos.mensaje, false);
+            return;
+        }
+        mostrarMensaje('msg-cliente', 'Cliente guardado correctamente', true);
+        document.getElementById('inp-nombre').value = '';
+        document.getElementById('inp-email').value = '';
+        document.getElementById('inp-telefono').value = '';
+        cargarClientes();
+        cargarSelects();
+    })
+    .catch(function(e) {
+        mostrarMensaje('msg-cliente', 'Error: ' + e.message, false);
+    });
+}
+
+function eliminarCliente(id) {
+    if (!confirm('Seguro que deseas eliminar este cliente?')) return;
+    fetch(servidor + '/clientes/' + id, { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+        cargarClientes();
+        cargarSelects();
+    });
+}
+
+// Lista Circular 
+function verSiguiente() {
+    fetch(servidor + '/reservas/siguiente')
+        .then(function(r) { return r.json(); })
+        .then(function(datos) {
+            if (datos.mensaje) {
+                alert('La lista esta vacia. Ve a Reservas primero.');
+                return;
+            }
+            var r   = datos.reserva;
+            var box = document.getElementById('caja-circ');
+            box.style.display = 'block';
+            document.getElementById('circ-cliente').textContent = 'Cliente: '  + r.nombre_cliente;
+            document.getElementById('circ-paquete').textContent = 'Paquete: '  + r.nombre_paquete;
+            document.getElementById('circ-fecha').textContent = 'Fecha: '    + r.fecha_reserva + ' a las ' + (r.hora_reserva || 'sin hora');
+            document.getElementById('circ-total').textContent = 'Total: $'   + Number(r.total_pagado).toLocaleString();
+            document.getElementById('circ-estado').textContent = 'Estado: '   + r.estado;
+            document.getElementById('circ-nota').textContent =
+                'Lista circular con ' + datos.total + ' reservas. Al llegar al ultimo nodo vuelve al primero automaticamente.';
+        })
+        .catch(function(e) { alert('Error: ' + e.message); });
+}
+
+function recargarLista() {
+    fetch(servidor + '/reservas')
+        .then(function(r) { return r.json(); })
+        .then(function() {
+            mostrarMensaje('msg-reserva', 'Lista recargada correctamente', true);
+            alert('Lista circular recargada con ' + arguments[0].length + ' reservas');
+        });
+}
+
+// Iniciar todo al abrir la pagina 
+cargarSelects();
+cargarReservas();
+cargarClientes();
+</script>
+</body>
+</html>
